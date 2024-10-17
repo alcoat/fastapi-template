@@ -1,5 +1,3 @@
-from typing import List, Optional
-
 from fastapi import Depends, FastAPI, HTTPException
 from starlette.responses import RedirectResponse
 from starlette.status import HTTP_201_CREATED
@@ -20,7 +18,7 @@ def create(key: str, value: str, todo_repository: TodoRepository = Depends(creat
         repo.save(Todo(key=key, value=value))
 
 
-@app.get("/get/{key}", response_model=Optional[Todo])
+@app.get("/get/{key}", response_model=Todo | None)
 def get(key: str, todo_repository: TodoRepository = Depends(create_todo_repository)):
     with todo_repository as repo:
         todo = repo.get_by_key(key)
@@ -31,7 +29,7 @@ def get(key: str, todo_repository: TodoRepository = Depends(create_todo_reposito
         return todo
 
 
-@app.get("/find", response_model=List[Todo])
+@app.get("/find", response_model=list[Todo])
 def find(todo_filter: TodoFilter = Depends(), todo_repository: TodoRepository = Depends(create_todo_repository)):
     with todo_repository as repo:
         return repo.get(todo_filter)

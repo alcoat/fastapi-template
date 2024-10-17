@@ -38,7 +38,7 @@ def todo_repository():
     session.close()
 
     sessionmaker(bind=engine, autocommit=True)().execute(
-        ";".join([f"TRUNCATE TABLE {t} CASCADE" for t in SQL_BASE.metadata.tables.keys()])
+        ";".join([f"TRUNCATE TABLE {t} CASCADE" for t in SQL_BASE.metadata.tables])
     )
 
 
@@ -76,13 +76,11 @@ def test_repository(todo_repository: SQLTodoRepository):
     todo = r.get_by_key("testkey")
     assert todo.value == "testvalue"
 
-    with pytest.raises(IntegrityError):
-        with todo_repository as r:
-            r.save(Todo(key="testkey", value="not allowed: unique todo keys!"))
+    with pytest.raises(IntegrityError), todo_repository as r:
+        r.save(Todo(key="testkey", value="not allowed: unique todo keys!"))
 
-    with pytest.raises(DataError):
-        with todo_repository as r:
-            r.save(Todo(key="too long", value=129 * "x"))
+    with pytest.raises(DataError), todo_repository as r:
+        r.save(Todo(key="too long", value=129 * "x"))
 
 
 @pytest.mark.integration

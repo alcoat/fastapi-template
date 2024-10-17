@@ -1,6 +1,6 @@
 import os
-from functools import lru_cache
-from typing import Iterator, List, Optional
+from collections.abc import Iterator
+from functools import cache
 
 from pydantic import BaseModel
 from sqlalchemy import Boolean, Column, Integer, String, create_engine
@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session, declarative_base, sessionmaker
 SQL_BASE = declarative_base()
 
 
-@lru_cache(maxsize=None)
+@cache
 def get_engine(db_string: str):
     return create_engine(db_string, pool_pre_ping=True)
 
@@ -31,26 +31,26 @@ class Todo(BaseModel):
 
 
 class TodoFilter(BaseModel):
-    limit: Optional[int] = None
-    key_contains: Optional[str] = None
-    value_contains: Optional[str] = None
-    done: Optional[bool] = None
+    limit: int | None = None
+    key_contains: str | None = None
+    value_contains: str | None = None
+    done: bool | None = None
 
 
 class TodoRepository:  # Interface
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type: type[Exception], exc_value: str, exc_traceback: str):
         pass
 
     def save(self, todo: Todo) -> None:
         raise NotImplementedError()
 
-    def get_by_key(self, key: str) -> Optional[Todo]:
+    def get_by_key(self, key: str) -> Todo | None:
         raise NotImplementedError()
 
-    def get(self, todo_filter: TodoFilter) -> List[Todo]:
+    def get(self, todo_filter: TodoFilter) -> list[Todo]:
         raise NotImplementedError()
 
 
@@ -61,10 +61,10 @@ class InMemoryTodoRepository:  # In-memory implementation of interface
     def save(self, todo: Todo) -> None:
         self.data[todo.key] = todo
 
-    def get_by_key(self, key: str) -> Optional[Todo]:
+    def get_by_key(self, key: str) -> Todo | None:
         return self.data.get(key)
 
-    def get(self, todo_filter: TodoFilter) -> List[Todo]:
+    def get(self, todo_filter: TodoFilter) -> list[Todo]:
         all_matching_todos = filter(
             lambda todo: (not todo_filter.key_contains or todo_filter.key_contains in todo.key)
             and (not todo_filter.value_contains or todo_filter.value_contains in todo.value)
@@ -79,7 +79,7 @@ class SQLTodoRepository(TodoRepository):  # SQL Implementation of interface
     def __init__(self, session):
         self._session: Session = session
 
-    def __exit__(self, exc_type, exc_value: str, exc_traceback: str) -> None:
+    def __exit__(self, exc_type: type[Exception], exc_value: str, exc_traceback: str) -> None:
         if any([exc_type, exc_value, exc_traceback]):
             self._session.rollback()
             return
@@ -93,7 +93,7 @@ class SQLTodoRepository(TodoRepository):  # SQL Implementation of interface
     def save(self, todo: Todo) -> None:
         self._session.add(TodoInDB(key=todo.key, value=todo.value))
 
-    def get_by_key(self, key: str) -> Optional[Todo]:
+    def get_by_key(self, key: str) -> Todo | None:
         instance = self._session.query(TodoInDB).filter(TodoInDB.key == key).first()
 
         if instance:
@@ -101,7 +101,7 @@ class SQLTodoRepository(TodoRepository):  # SQL Implementation of interface
 
         return None
 
-    def get(self, todo_filter: TodoFilter) -> List[Todo]:
+    def get(self, todo_filter: TodoFilter) -> list[Todo]:
         query = self._session.query(TodoInDB)
 
         if todo_filter.key_contains is not None:

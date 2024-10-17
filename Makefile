@@ -4,15 +4,14 @@ SHELL := bash
 
 export DOCKER_BUILDKIT=1
 export COMPOSE_DOCKER_CLI_BUILD=1
-export PROJECT=api
 
 targets: help
 
 up: ## Run the application
-	docker compose up --build api
+	docker compose up -d --build api
 
 
-done: lint test ## Prepare for a commit
+done: check test ## Prepare for a commit
 test: utest itest  ## Run unit and integration tests
 
 ci-compose := docker compose -f .ci/docker-compose.yml
@@ -23,19 +22,13 @@ utest: cleantest ## Run unit tests
 itest: cleantest ## Run integration tests
 	$(ci-compose) run --rm integration pytest -m integration .
 
-check: ## Check the code base
-	$(ci-compose) run --rm unit black ./$(PROJECT) --check --diff
-	$(ci-compose) run --rm unit isort ./$(PROJECT) --check --diff
-	$(ci-compose) run --rm -v mypycache:/home/user/.mypy_cache unit mypy ./$(PROJECT)
-
-lint: ## Check the code base, and fix it
-	$(ci-compose) run --rm unit black ./$(PROJECT)
-	$(ci-compose) run --rm unit isort ./$(PROJECT)
-	$(ci-compose) run --rm -v mypycache:/home/user/.mypy_cache unit mypy ./$(PROJECT)
+check: cleantest ## Check the code base
+	$(ci-compose) run --rm unit pre-commit run -a
 
 cleantest:  ## Clean up test containers
-	$(ci-compose) build
+	$(ci-compose) kill
 	$(ci-compose) down --remove-orphans
+	$(ci-compose) build
 
 
 ## Migrations

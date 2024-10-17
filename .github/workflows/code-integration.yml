@@ -25,4 +25,3 @@ jobs:
 
       - name: Checks
         run: make check
-

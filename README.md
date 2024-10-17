@@ -33,25 +33,25 @@ such that you can easily run different commands without remembering the exact ar
 Run `make help` to get an overview of the available commands:
 ```sh
 $ make help
-up: 
+up:
  Run the application
-done: lint test 
+done: lint test
  Prepare for a commit
-test: utest itest  
+test: utest itest
  Run unit and integration tests
-check: 
+check:
  Check the code base
-lint: 
+lint:
  Check the code base, and fix it
-clean_test:  
+clean_test:
  Clean up test containers
-migrations: 
+migrations:
  Generate a migration using alembic
-migrate: 
+migrate:
  Run migrations upgrade using alembic
-downgrade: 
+downgrade:
  Run migrations downgrade using alembic
-help: 
+help:
  Display this help message
 ```
 
