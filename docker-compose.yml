@@ -10,7 +10,7 @@ services:
       dockerfile: ./api/Dockerfile
       context: .
     volumes:
-      - ./api:/home/user/api
+      - ./api:/home/user/app/api
     environment:
       - DB_STRING=postgresql://postgres:test@db:5432/postgres
 
