@@ -13,7 +13,7 @@ Docker makes it easy to get started and enables easier switching between project
 
 To start up the project locally you first clone the project, and then run the following command in the cloned directory:
 ```sh
-$ git clone https://github.com/BiteStreams/fastapi-template.git
+$ git clone https://github.com/Donnype/fastapi-template.git
 $ cd fastapi-template
 $ make up
 ```
@@ -35,15 +35,17 @@ Run `make help` to get an overview of the available commands:
 $ make help
 up:
  Run the application
-done: lint test
+done: check test
  Prepare for a commit
 test: utest itest
  Run unit and integration tests
-check:
+utest: cleantest
+ Run unit tests
+itest: cleantest
+ Run integration tests
+check: cleantest
  Check the code base
-lint:
- Check the code base, and fix it
-clean_test:
+cleantest:
  Clean up test containers
 migrations:
  Generate a migration using alembic
@@ -81,10 +83,11 @@ You can run the tests using:
 ```bash
 $ make test
 ```
-This runs the integration & unit tests. If you want to run them separately, use `make itest` to run the integration tests and `make utest` to run the unit tests.
+This runs the integration & unit tests.
+If you want to run them separately, use `make itest` to run the integration tests and `make utest` to run the unit tests.
 
 
 ## Further reading
 
 To read about the benefits of using this template,
-check out [our blog post](https://bitestreams.com/blog/fastapi_template/).
+check out [my blog post](https://bitestreams.com/blog/fastapi_template/).
