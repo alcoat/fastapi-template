@@ -6,8 +6,6 @@ services:
       context: ..
       dockerfile: api/Dockerfile
       target: test
-    volumes:
-      - ../api:/home/user/app/api
     environment:
       - DB_STRING=postgresql://postgres:test@ci_db:5432/postgres
 
@@ -18,8 +16,6 @@ services:
       context: ..
       dockerfile: api/Dockerfile
       target: test
-    volumes:
-      - ../api:/home/user/app/api
     environment:
       - DB_STRING=postgresql://postgres:test@ci_db:5432/postgres
 
